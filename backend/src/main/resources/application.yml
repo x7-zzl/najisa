@@ -1,0 +1,114 @@
+server:
+  port: 8088
+  servlet:
+    # 应用的访问路径
+    context-path: /umr
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+    # 连接数满后的排队数，默认为100
+    accept-count: 1000
+    threads:
+      # tomcat最大线程数，默认为200
+      max: 800
+      # Tomcat启动初始化的线程数，默认值10
+      min-spare: 100
+
+
+#多环境配置
+spring:
+  profiles:
+    active: dev
+  application:
+    name: najisa
+
+  # openai 配置
+#  ai:
+#    openai:
+#      api-key: sk-a7d75777e83842f3918731be3bd89490
+#      base-url: https://api.deepseek.com
+#      chat:
+#        options:
+#          # 模型名称
+#          model: deepseek-chat
+#          # 模型温度，值越大，输出结果越随机
+#          temperature: 0.7
+
+  #设置日期参数
+  jackson:
+    date-format: yyyy-MM-dd
+    time-zone: GMT+8
+  servlet:
+    multipart:
+      # 单个文件大小
+      max-file-size: 1000MB
+      # 设置总上传的文件大小
+      max-request-size: 1000MB
+
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+
+# MyBatis
+mybatis:
+  # 搜索指定包别名
+  typeAliasesPackage: com.zzl.umr.**
+  # 配置mapper的扫描，找到所有的mapper.xml映射文件
+  mapperLocations: classpath*:mapper/**/*Mapper.xml
+  # 加载全局的配置文件
+  configLocation: classpath:mybatis/mybatis-config.xml
+
+# mybatisPlus配置
+mybatis-plus:
+  # mapper映射地址
+  mapper-locations: classpath:mapper/mysql/*.xml
+  # 实体类扫描包路径
+  type-aliases-package: com.zzl.umr.model
+  configuration:
+    # sql打印
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 开启驼峰命名
+    map-underscore-to-camel-case: true
+    useGeneratedKeys: true
+
+# 跨域配置
+cors:
+  # Knife4j 配置
+  knife4j:
+    enable: true  # 开启Knife4j
+    production: false  # 生产环境设为true会屏蔽文档
+    basic:
+      enable: false  # 是否开启Basic认证
+      username: admin  # Basic认证用户名
+      password: 123456  # Basic认证密码
+
+#Sa-Token 配置
+#sa-token:
+#  # token 名称（同时也是 cookie 名称）
+#  token-name: satoken
+#  # token 有效期（单位：秒） 默认30天，-1 代表永久有效
+#  timeout: 2592000
+#  # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
+#  active-timeout: -1
+#  # 是否允许同一账号多地同时登录 （为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
+#  is-concurrent: true
+#  # 在多人登录同一账号时，是否共用一个 token （为 true 时所有登录共用一个 token, 为 false 时每次登录新建一个 token）
+#  is-share: false
+#  # token 风格（默认可取值：uuid、simple-uuid、random-32、random-64、random-128、tik）
+#  token-style: uuid
+#  # 是否输出操作日志
+#  is-log: true
+
+#日志级别配置
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    name: logs/app.log
+  level:
+    root: INFO
+    com.ohos: DEBUG
+    org.springframework.amqp: DEBUG
+    org.springframework.ai.chat.client.advisor: debug
+    com.ai.zzl: debug
+
+

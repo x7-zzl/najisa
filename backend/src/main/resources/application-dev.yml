@@ -1,0 +1,55 @@
+#端口号
+server:
+  port: 8088
+
+# 数据源配置
+spring:
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/umr?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: root
+    password: 123456
+# redis配置
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    #数据库索引（默认为0）
+    database: 0
+    timeout: 1800000
+    lettuce:
+      pool:
+        # 连接池最大连接数（使用负值表示没有限制）
+        max-active: 20
+        # 最大阻塞等待时间（负数表示没有限制）
+        max-wait: -1
+        # 连接池中最大空闲连接
+        max-idle: 5
+        # 连接池中最小空闲连接
+        min-idle: 0
+  # rabbitmq配置
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    listener:
+      simple:
+        acknowledge-mode: manual
+        concurrency: 3
+        max-concurrency: 10
+
+# 文件下载路径
+file:
+  storage:
+    # 存到当前目录下 uploads（相对路径，跨平台）
+    local-dir: ./uploads
+  access:
+    base-url: http://localhost:8088
+
+# 认证
+auth:
+  jwt:
+    secret: +QNj7vtIm9j1DCtJk38PleArUk1SsDXTjS6f/zpeSIxnhOjhHVrUcIn03FvLTH4ow3n4b9jq3YAALzymKmnXPQ==
