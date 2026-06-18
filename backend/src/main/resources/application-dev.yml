@@ -8,7 +8,7 @@ spring:
     driverClassName: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/umr?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
     username: root
-    password: 123456
+    password: yswysyydxj.
 # redis配置
   redis:
     host: 127.0.0.1
@@ -28,7 +28,7 @@ spring:
         min-idle: 0
   # rabbitmq配置
   rabbitmq:
-    host: localhost
+    host: 47.99.32.203
     port: 5672
     username: guest
     password: guest
@@ -44,7 +44,7 @@ spring:
 # 文件下载路径
 file:
   storage:
-    # 存到当前目录下 uploads（相对路径，跨平台）
+    # 存到当前目录下 uploads
     local-dir: ./uploads
   access:
     base-url: http://localhost:8088
