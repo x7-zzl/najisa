@@ -644,6 +644,12 @@ const submitForm = async () => {
     const res = await request.post(url, submitData)
     if (res.code === 200) {
       ElMessage.success('操作成功')
+      // 更新 originalImages，防止 handleDialogClose 把刚保存的图片误删
+      originalImages.value = {
+        1: form.guInsectAvatarOne,
+        2: form.guInsectAvatarTwo,
+        3: form.guInsectAvatarThree
+      }
       dialogVisible.value = false
       fetchData()
     }
