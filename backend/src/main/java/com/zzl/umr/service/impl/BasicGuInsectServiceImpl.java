@@ -52,6 +52,9 @@ public class BasicGuInsectServiceImpl extends ServiceImpl<BasicGuInsectMapper, B
 
     @Resource
     private BasicFileService basicFileService;
+
+    @Resource
+    private BasicGuInsectService self;
     /**
      * 通过ID查询单条数据
      *
@@ -161,6 +164,7 @@ public class BasicGuInsectServiceImpl extends ServiceImpl<BasicGuInsectMapper, B
      * @return 是否成功
      */
     @Override
+    @Transactional
     public boolean updateById(BasicGuInsect basicGuInsect) {
         log.info("修改一条数据:{}", basicGuInsect);
         if (basicGuInsect == null || StringUtils.isBlank(basicGuInsect.getId())) {
@@ -177,13 +181,13 @@ public class BasicGuInsectServiceImpl extends ServiceImpl<BasicGuInsectMapper, B
             String newTwo = basicGuInsect.getGuInsectAvatarTwo();
             String newThree = basicGuInsect.getGuInsectAvatarThree();
 
-            if (newOne != null && StringUtils.isNotBlank(oldOne) && !StringUtils.equals(oldOne, newOne)) {
+            if (StringUtils.isNotBlank(newOne) && StringUtils.isNotBlank(oldOne) && !StringUtils.equals(oldOne, newOne)) {
                 basicFileService.deleteLocalByUrl(oldOne);
             }
-            if (newTwo != null && StringUtils.isNotBlank(oldTwo) && !StringUtils.equals(oldTwo, newTwo)) {
+            if (StringUtils.isNotBlank(newTwo) && StringUtils.isNotBlank(oldTwo) && !StringUtils.equals(oldTwo, newTwo)) {
                 basicFileService.deleteLocalByUrl(oldTwo);
             }
-            if (newThree != null && StringUtils.isNotBlank(oldThree) && !StringUtils.equals(oldThree, newThree)) {
+            if (StringUtils.isNotBlank(newThree) && StringUtils.isNotBlank(oldThree) && !StringUtils.equals(oldThree, newThree)) {
                 basicFileService.deleteLocalByUrl(oldThree);
             }
         }
@@ -201,8 +205,24 @@ public class BasicGuInsectServiceImpl extends ServiceImpl<BasicGuInsectMapper, B
     public boolean deleteById(String basicGuInsectId) {
         log.info("删除一条数据，Id:{}", basicGuInsectId);
 
+        // 先查询，用于后续删文件和发消息（删后查不到）
+        BasicGuInsect insect = this.queryById(basicGuInsectId);
+
         boolean b = basicGuInsectMapper.deleteById(basicGuInsectId) > 0;
         if (b) {
+
+            // 删除关联的图片物理文件（basic_file 记录保留）
+            if (insect != null) {
+                if (StringUtils.isNotBlank(insect.getGuInsectAvatarOne())) {
+                    basicFileService.deleteLocalByUrl(insect.getGuInsectAvatarOne());
+                }
+                if (StringUtils.isNotBlank(insect.getGuInsectAvatarTwo())) {
+                    basicFileService.deleteLocalByUrl(insect.getGuInsectAvatarTwo());
+                }
+                if (StringUtils.isNotBlank(insect.getGuInsectAvatarThree())) {
+                    basicFileService.deleteLocalByUrl(insect.getGuInsectAvatarThree());
+                }
+            }
 
             try {
                 // 删除关联信息表
@@ -214,23 +234,21 @@ public class BasicGuInsectServiceImpl extends ServiceImpl<BasicGuInsectMapper, B
                 }
             } catch (CommonServiceException ignored) {
             } finally {
-                //查询数据
-                BasicGuInsect queryInsect = this.queryById(basicGuInsectId);
-                if (queryInsect != null) {
+                if (insect != null) {
                     SysMessageDTO message = new SysMessageDTO();
                     // 把basicGuInsect复制到 message
                     message.setBusinessId(basicGuInsectId);
 
                     // 蛊虫名称
-                    message.setName(queryInsect.getName());
+                    message.setName(insect.getName());
                     // 操作类型
                     message.setOperationType(DELETE_STRING);
                     message.setTimestamp(System.currentTimeMillis());
 
                     // 蛊虫流派
-                    if (queryInsect.getGenre() != null) {
+                    if (insect.getGenre() != null) {
                         message.setGenreName(
-                                EnumUtil.getEnumNameByCode(GuInsectGenreEnum.class, queryInsect.getGenre(), ENUM_GET_CODE_METHOD_NAME, ENUM_GET_NAME_METHOD_NAME)
+                                EnumUtil.getEnumNameByCode(GuInsectGenreEnum.class, insect.getGenre(), ENUM_GET_CODE_METHOD_NAME, ENUM_GET_NAME_METHOD_NAME)
                         );
                     }
 
@@ -254,7 +272,13 @@ public class BasicGuInsectServiceImpl extends ServiceImpl<BasicGuInsectMapper, B
     public Integer batchDelete(List<String> idList) {
         if (CollectionUtil.isNotEmpty(idList)) {
             log.info("批量删除{}条数据", idList.size());
-            return basicGuInsectMapper.deleteBatchIds(idList);
+            int count = 0;
+            for (String id : idList) {
+                if (self.deleteById(id)) {
+                    count++;
+                }
+            }
+            return count;
         }
         return 0;
     }

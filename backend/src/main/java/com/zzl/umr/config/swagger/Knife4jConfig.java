@@ -21,7 +21,7 @@ import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
  */
 @Configuration
 @EnableSwagger2
-@EnableKnife4j  // 启用 Knife4j 增强功能
+@EnableKnife4j
 @Import(BeanValidatorPluginsConfiguration.class)
 public class Knife4jConfig {
 
