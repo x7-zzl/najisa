@@ -7,7 +7,9 @@ import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.zzl.umr.constants.MessageConstant.*;
 
@@ -93,5 +95,42 @@ public class BasicUserWealthController {
             return HttpResult.success(DELETE_SUCCESS_MSG);
         }
         return HttpResult.fail();
+    }
+
+    /**
+     * 每日签到
+     *
+     * @param userId 用户ID
+     * @return 签到结果
+     */
+    @PostMapping("/dailySignIn")
+    public HttpResult dailySignIn(String userId) {
+        // 先检查今日是否已签到
+        if (basicUserWealthService.hasSignedInToday(userId)) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("signedIn", false);
+            data.put("message", "今日已签到，明日再来");
+            return HttpResult.success(data);
+        }
+
+        // 执行签到
+        basicUserWealthService.processDailyLoginReward(userId);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("signedIn", true);
+        data.put("message", "签到成功，获得1块元石，经验值+10");
+        return HttpResult.success(data);
+    }
+
+    /**
+     * 查询今日签到状态
+     *
+     * @param userId 用户ID
+     * @return 签到状态
+     */
+    @GetMapping("/checkSignInStatus")
+    public HttpResult checkSignInStatus(String userId) {
+        boolean signedIn = basicUserWealthService.hasSignedInToday(userId);
+        return HttpResult.success(signedIn);
     }
 }

@@ -200,6 +200,27 @@ public class BasicUserWealthServiceImpl extends ServiceImpl<BasicUserWealthMappe
     }
 
     /**
+     * 查询用户今日是否已签到
+     *
+     * @param userId 用户ID
+     * @return true-已签到，false-未签到
+     */
+    @Override
+    public boolean hasSignedInToday(String userId) {
+        LambdaQueryWrapper<BasicUserWealth> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(BasicUserWealth::getUserId, userId).last("limit 1");
+        BasicUserWealth wealth = basicUserWealthMapper.selectOne(queryWrapper);
+
+        if (wealth == null || wealth.getLastRewardDate() == null) {
+            return false;
+        }
+
+        Date today = DateUtil.beginOfDay(new Date());
+        Date lastRewardDay = DateUtil.beginOfDay(wealth.getLastRewardDate());
+        return DateUtil.isSameDay(lastRewardDay, today);
+    }
+
+    /**
      * 处理查询条件
      *
      * @param queryWrapper    查询条件

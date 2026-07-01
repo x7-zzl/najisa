@@ -224,9 +224,6 @@ public class BasicUserServiceImpl extends ServiceImpl<BasicUserMapper, BasicUser
             userWrapper.eq(BasicUser::getUserName, logInCdn.getUserName().trim()).last("limit 1");
             BasicUser user = basicUserMapper.selectOne(userWrapper);
 
-            // 处理每日登录奖励（元石+1，经验+10）
-            basicUserWealthService.processDailyLoginReward(user.getId());
-
             LambdaQueryWrapper<BasicUserLogin> loginWrapper = new LambdaQueryWrapper<>();
             loginWrapper.eq(BasicUserLogin::getUserId, user.getId()).last("limit 1");
             BasicUserLogin userLogin = basicUserLoginMapper.selectOne(loginWrapper);

@@ -82,4 +82,12 @@ public interface BasicUserWealthService extends IService<BasicUserWealth> {
      * @param userId 用户ID
      */
     void initUserWealth(String userId);
+
+    /**
+     * 查询用户今日是否已签到
+     *
+     * @param userId 用户ID
+     * @return true-已签到，false-未签到
+     */
+    boolean hasSignedInToday(String userId);
 }
