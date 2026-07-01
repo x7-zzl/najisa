@@ -28,10 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.List;
 
-import static com.zzl.umr.constants.MessageConstant.ADD_STRING;
-import static com.zzl.umr.constants.MessageConstant.DELETE_STRING;
-import static com.zzl.umr.constants.MessageConstant.ENUM_GET_CODE_METHOD_NAME;
-import static com.zzl.umr.constants.MessageConstant.ENUM_GET_NAME_METHOD_NAME;
+import static com.zzl.umr.constants.MessageConstant.*;
 
 /**
  * @author zhangzl
@@ -53,8 +50,6 @@ public class BasicGuInsectServiceImpl extends ServiceImpl<BasicGuInsectMapper, B
     @Resource
     private BasicFileService basicFileService;
 
-    @Resource
-    private BasicGuInsectService self;
     /**
      * 通过ID查询单条数据
      *
@@ -274,7 +269,7 @@ public class BasicGuInsectServiceImpl extends ServiceImpl<BasicGuInsectMapper, B
             log.info("批量删除{}条数据", idList.size());
             int count = 0;
             for (String id : idList) {
-                if (self.deleteById(id)) {
+                if (this.deleteById(id)) {
                     count++;
                 }
             }
