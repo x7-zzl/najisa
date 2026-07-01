@@ -8,12 +8,14 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zzl.umr.config.exception.CommonServiceException;
+import com.zzl.umr.enums.CultivationLevelEnum;
 import com.zzl.umr.enums.UserDisEnabledEnum;
 import com.zzl.umr.enums.UserRoleEnum;
 import com.zzl.umr.mapper.BasicUserLoginMapper;
 import com.zzl.umr.mapper.BasicUserMapper;
 import com.zzl.umr.model.BasicUser;
 import com.zzl.umr.model.BasicUserLogin;
+import com.zzl.umr.model.BasicUserWealth;
 import com.zzl.umr.model.cdn.BaseQueryCdn;
 import com.zzl.umr.model.cdn.LoginCdn;
 import com.zzl.umr.model.dto.HttpResult;
@@ -404,7 +406,16 @@ public class BasicUserServiceImpl extends ServiceImpl<BasicUserMapper, BasicUser
         loginWrapper.eq(BasicUserLogin::getUserId, userId).last("limit 1");
         BasicUserLogin userLogin = basicUserLoginMapper.selectOne(loginWrapper);
 
-        UserProfileDTO profileDto = UserProfileDTO.builder()
+        // 查询财富信息
+        LambdaQueryWrapper<BasicUserWealth> wealthWrapper = new LambdaQueryWrapper<>();
+        wealthWrapper.eq(BasicUserWealth::getUserId, userId).last("limit 1");
+        BasicUserWealth wealth = basicUserWealthService.getOne(wealthWrapper);
+
+        // 获取境界称号
+        Integer level = (wealth != null && wealth.getLevel() != null) ? wealth.getLevel() : 1;
+        CultivationLevelEnum levelEnum = CultivationLevelEnum.getByCode(level);
+
+        return UserProfileDTO.builder()
                 .id(user.getId())
                 .userName(user.getUserName())
                 .nickName(user.getNickName())
@@ -414,9 +425,13 @@ public class BasicUserServiceImpl extends ServiceImpl<BasicUserMapper, BasicUser
                 .phoneNumber(user.getPhoneNumber())
                 .emailAddress(user.getEmailAddress())
                 .userAvatar(userLogin != null ? userLogin.getUserAvatar() : null)
+                .level(level)
+                .levelTitle(levelEnum.getTitle())
+                .levelCategory(levelEnum.getCategory())
+                .originStone(wealth != null ? wealth.getOriginStone() : 0.0)
+                .immortalOriginStone(wealth != null ? wealth.getImmortalOriginStone() : 0.0)
+                .experience(wealth != null ? wealth.getExperience() : 0L)
                 .build();
-
-        return profileDto;
     }
 
     @Transactional(rollbackFor = Exception.class)
