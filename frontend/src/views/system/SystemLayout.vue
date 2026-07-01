@@ -34,6 +34,17 @@
       <el-icon :size="20"><Monitor /></el-icon>
     </el-button>
 
+    <!-- 每日签到按钮 -->
+    <el-button
+      v-if="showSignInBtn"
+      class="sign-in-btn"
+      :loading="signingIn"
+      @click="handleSignIn"
+    >
+      <el-icon :size="16"><Present /></el-icon>
+      <span>签到</span>
+    </el-button>
+
     <!-- 用户头像部分 -->
     <el-dropdown trigger="click">
       <span class="user-box">
@@ -59,6 +70,11 @@
     </el-header>
 
     <el-main class="main">
+      <!-- 签到成功提示 -->
+      <transition name="toast-fade">
+        <div v-if="toastVisible" class="sign-toast">{{ toastMessage }}</div>
+      </transition>
+
       <div class="main-bg" :style="bgStyle">
         <router-view />
       </div>
@@ -67,13 +83,13 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowDown, SwitchButton, Monitor, User } from '@element-plus/icons-vue'
+import { ArrowDown, SwitchButton, Monitor, User, Present } from '@element-plus/icons-vue'
 import MessageNotification from '@/components/MessageNotification.vue'
 import bgUrl from '@/assets/forum-bg.jpg'
-import { logout as apiLogout } from '@/utils/request'
+import { logout as apiLogout, dailySignIn, checkSignInStatus } from '@/utils/request'
 
 const route = useRoute()
 const router = useRouter()
@@ -87,6 +103,50 @@ const avatarText = computed(() => {
 })
 
 const activePath = computed(() => route.path)
+
+// ====== 签到相关 ======
+const showSignInBtn = ref(false)
+const signingIn = ref(false)
+const toastVisible = ref(false)
+const toastMessage = ref('')
+
+const userId = computed(() => localStorage.getItem('loginUserId'))
+
+// 页面加载时查询签到状态
+onMounted(async () => {
+  if (userId.value) {
+    try {
+      const res = await checkSignInStatus(userId.value)
+      // res.data 为 true 表示已签到，false 表示未签到
+      showSignInBtn.value = !res.data
+    } catch (error) {
+      console.error('查询签到状态失败:', error)
+    }
+  }
+})
+
+const handleSignIn = async () => {
+  if (!userId.value || signingIn.value) return
+  signingIn.value = true
+  try {
+    const res = await dailySignIn(userId.value)
+    if (res.data && res.data.signedIn) {
+      toastMessage.value = res.data.message || '签到成功，获得1块元石，经验值+10'
+      toastVisible.value = true
+      showSignInBtn.value = false
+      setTimeout(() => { toastVisible.value = false }, 1000)
+    } else {
+      // 已经签到过了
+      ElMessage.info(res.data?.message || '今日已签到')
+      showSignInBtn.value = false
+    }
+  } catch (error) {
+    console.error('签到失败:', error)
+    ElMessage.error('签到失败，请稍后重试')
+  } finally {
+    signingIn.value = false
+  }
+}
 
 const onSelectMenu = (index) => router.push(index)
 
@@ -158,12 +218,12 @@ const bgStyle = computed(() => ({
   white-space: nowrap;
   flex-shrink: 0;
   transform: translateY(1px);
-  cursor: pointer;  /* ✅ 添加鼠标指针 */
+  cursor: pointer;
   transition: opacity 0.3s ease;
 }
 
 .brand:hover {
-  opacity: 0.7;  /* ✅ 悬停效果 */
+  opacity: 0.7;
 }
 
 .brand-title {
@@ -228,12 +288,10 @@ const bgStyle = computed(() => ({
   text-overflow: unset;
 }
 
-/* hover:轻微提亮 */
 :deep(.el-menu--horizontal .el-menu-item:hover) {
   background: rgba(64, 158, 255, 0.08);
 }
 
-/* ✅ 下划线动画:默认隐藏 */
 :deep(.el-menu--horizontal .el-menu-item::after) {
   content: "";
   position: absolute;
@@ -248,7 +306,6 @@ const bgStyle = computed(() => ({
   transition: transform 220ms ease;
 }
 
-/* ✅ 激活态:淡色胶囊 + 细下划线 */
 :deep(.el-menu--horizontal .el-menu-item.is-active) {
   background: rgba(64, 158, 255, 0.12);
   color: #1f2d3d !important;
@@ -259,12 +316,11 @@ const bgStyle = computed(() => ({
   transform: scaleX(1);
 }
 
-
 /* ====== 右侧用户区 - 添加间距 ====== */
 .right {
   display: flex;
   align-items: center;
-  gap: 16px; /* 增加间距 */
+  gap: 12px;
   flex-shrink: 0;
 }
 
@@ -286,6 +342,41 @@ const bgStyle = computed(() => ({
   background: rgba(64, 158, 255, 0.08);
 }
 
+/* ====== 签到按钮 ====== */
+.sign-in-btn {
+  height: 34px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+  box-shadow: 0 2px 8px rgba(245, 175, 25, 0.35);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sign-in-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(245, 175, 25, 0.50);
+  background: linear-gradient(135deg, #f6b830 0%, #f23d25 100%);
+}
+
+.sign-in-btn:active {
+  transform: translateY(0);
+}
+
+.sign-in-btn.is-loading {
+  background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+}
+
+.sign-in-btn.is-loading::before {
+  border-color: rgba(255, 255, 255, 0.5);
+  border-top-color: #fff;
+}
 
 .user-box {
   display: inline-flex;
@@ -312,6 +403,7 @@ const bgStyle = computed(() => ({
 /* ====== 主体背景:图片 cover 自适应 ====== */
 .main {
   padding: 0;
+  position: relative;
 }
 
 .main-bg {
@@ -324,7 +416,6 @@ const bgStyle = computed(() => ({
   background-repeat: no-repeat;
 }
 
-/* ✅ 遮罩更轻:让背景更清晰但不影响阅读 */
 .main-bg::before {
   content: "";
   position: absolute;
@@ -337,5 +428,39 @@ const bgStyle = computed(() => ({
 .main-bg > * {
   position: relative;
   z-index: 1;
+}
+
+/* ====== 签到 Toast 提示 ====== */
+.sign-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  padding: 10px 28px;
+  background: rgba(0, 0, 0, 0.72);
+  border-radius: 24px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* toast 过渡动画 */
+.toast-fade-enter-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.toast-fade-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.toast-fade-enter-from {
+  opacity: 0;
+  transform: translate(-50%, -50%) translateY(12px);
+}
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -50%) translateY(-8px);
 }
 </style>

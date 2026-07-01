@@ -137,3 +137,20 @@ export const getVideoById = (params) => {
     params
   })
 }
+
+// ====== 每日签到 ======
+export const dailySignIn = (userId) => {
+  return service({
+    url: '/basicUserWealth/dailySignIn',
+    method: 'post',
+    params: { userId }
+  })
+}
+
+export const checkSignInStatus = (userId) => {
+  return service({
+    url: '/basicUserWealth/checkSignInStatus',
+    method: 'get',
+    params: { userId }
+  })
+}
