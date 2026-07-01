@@ -47,6 +47,12 @@ public class BasicUserWealth implements Serializable {
     private Long experience;
 
     /**
+     * 上次领取每日登录奖励日期
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date lastRewardDate;
+
+    /**
      * 创建人
      */
     @TableField(fill = FieldFill.INSERT)

@@ -165,6 +165,12 @@ CREATE TABLE `basic_user_wealth`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户财富信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Migration: 添加每日登录奖励日期字段 & 修改等级默认值
+-- ----------------------------
+ALTER TABLE `basic_user_wealth` ADD COLUMN `last_reward_date` date NULL DEFAULT NULL COMMENT '上次领取每日登录奖励日期' AFTER `experience`;
+ALTER TABLE `basic_user_wealth` MODIFY COLUMN `level` int NULL DEFAULT 1 COMMENT '等级';
+
+-- ----------------------------
 -- Records of basic_user_wealth
 -- ----------------------------
 

@@ -1,6 +1,7 @@
 package com.zzl.umr.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zzl.umr.mapper.BasicUserWealthMapper;
@@ -9,8 +10,11 @@ import com.zzl.umr.service.BasicUserWealthService;
 import com.zzl.umr.utils.SnowflakeIdWorker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -126,6 +130,73 @@ public class BasicUserWealthServiceImpl extends ServiceImpl<BasicUserWealthMappe
             return basicUserWealthMapper.deleteBatchIds(idList);
         }
         return 0;
+    }
+
+    /**
+     * 处理每日登录奖励
+     * 每天只记录一次登录奖励
+     *
+     * @param userId 用户ID
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void processDailyLoginReward(String userId) {
+        // 查询用户财富信息
+        LambdaQueryWrapper<BasicUserWealth> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(BasicUserWealth::getUserId, userId).last("limit 1");
+        BasicUserWealth wealth = basicUserWealthMapper.selectOne(queryWrapper);
+
+        if (wealth == null) {
+            // 如果财富记录不存在，先初始化
+            log.warn("用户{}财富记录不存在，执行初始化", userId);
+            initUserWealth(userId);
+            return;
+        }
+
+        // 获取今天的日期
+        Date today = DateUtil.beginOfDay(new Date());
+
+        // 检查今天是否已经领取过奖励
+        if (wealth.getLastRewardDate() != null) {
+            Date lastRewardDay = DateUtil.beginOfDay(wealth.getLastRewardDate());
+            if (DateUtil.isSameDay(lastRewardDay, today)) {
+                log.info("用户{}今天已领取过每日登录奖励，跳过", userId);
+                return;
+            }
+        }
+
+        // 发放奖励：元石+1，经验+10
+        double newOriginStone = (wealth.getOriginStone() != null ? wealth.getOriginStone() : 0) + 1;
+        long newExperience = (wealth.getExperience() != null ? wealth.getExperience() : 0) + 10;
+
+        wealth.setOriginStone(newOriginStone);
+        wealth.setExperience(newExperience);
+        wealth.setLastRewardDate(today);
+
+        basicUserWealthMapper.updateById(wealth);
+
+        log.info("用户{}每日登录奖励发放成功：元石+1（当前：{}），经验+10（当前：{}）", userId, newOriginStone, newExperience);
+    }
+
+    /**
+     * 初始化用户财富
+     *
+     * @param userId 用户ID
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void initUserWealth(String userId) {
+        BasicUserWealth wealth = new BasicUserWealth();
+        wealth.setId(SnowflakeIdWorker.newId());
+        wealth.setUserId(userId);
+        wealth.setLevel(1);
+        wealth.setOriginStone(0.0);
+        wealth.setImmortalOriginStone(0.0);
+        wealth.setExperience(0L);
+
+        basicUserWealthMapper.insert(wealth);
+
+        log.info("用户{}财富初始化成功：等级=1，元石=0，经验=0", userId);
     }
 
     /**

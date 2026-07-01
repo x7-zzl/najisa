@@ -21,6 +21,7 @@ import com.zzl.umr.model.dto.UserProfileDTO;
 import com.zzl.umr.service.BasicFileService;
 import com.zzl.umr.service.BasicUserLoginService;
 import com.zzl.umr.service.BasicUserService;
+import com.zzl.umr.service.BasicUserWealthService;
 import com.zzl.umr.service.RedisService;
 import com.zzl.umr.utils.EnumUtil;
 import com.zzl.umr.utils.JwtUtils;
@@ -73,6 +74,9 @@ public class BasicUserServiceImpl extends ServiceImpl<BasicUserMapper, BasicUser
 
     @Resource
     private BasicFileService basicFileService;
+
+    @Resource
+    private BasicUserWealthService basicUserWealthService;
 
     /**
      * 通过ID查询单条数据
@@ -220,6 +224,9 @@ public class BasicUserServiceImpl extends ServiceImpl<BasicUserMapper, BasicUser
             userWrapper.eq(BasicUser::getUserName, logInCdn.getUserName().trim()).last("limit 1");
             BasicUser user = basicUserMapper.selectOne(userWrapper);
 
+            // 处理每日登录奖励（元石+1，经验+10）
+            basicUserWealthService.processDailyLoginReward(user.getId());
+
             LambdaQueryWrapper<BasicUserLogin> loginWrapper = new LambdaQueryWrapper<>();
             loginWrapper.eq(BasicUserLogin::getUserId, user.getId()).last("limit 1");
             BasicUserLogin userLogin = basicUserLoginMapper.selectOne(loginWrapper);
@@ -274,6 +281,7 @@ public class BasicUserServiceImpl extends ServiceImpl<BasicUserMapper, BasicUser
      * @param logInCdn 注册参数
      * @return 注册结果
      */
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public HttpResult<String> register(LoginCdn logInCdn) {
         log.info("注册参数:{}", logInCdn);
@@ -322,6 +330,9 @@ public class BasicUserServiceImpl extends ServiceImpl<BasicUserMapper, BasicUser
             log.error("注册失败：用户名{}插入数据库失败", userName);
             return HttpResult.fail("注册失败，请稍后重试");
         }
+
+        // 初始化用户财富：等级默认1，元石0，经验0
+        basicUserWealthService.initUserWealth(basicUser.getId());
 
         log.info("注册成功：用户名{}", userName);
         return HttpResult.success("注册成功");

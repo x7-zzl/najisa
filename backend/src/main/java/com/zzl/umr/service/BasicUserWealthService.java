@@ -67,4 +67,19 @@ public interface BasicUserWealthService extends IService<BasicUserWealth> {
      * @return 删除数量
      */
     Integer batchDelete(List<String> idList);
+
+    /**
+     * 每日登录奖励
+     * 每天只记录一次
+     *
+     * @param userId 用户ID
+     */
+    void processDailyLoginReward(String userId);
+
+    /**
+     * 初始化用户财富
+     *
+     * @param userId 用户ID
+     */
+    void initUserWealth(String userId);
 }
