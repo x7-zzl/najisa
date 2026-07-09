@@ -108,7 +108,7 @@ logging:
     root: INFO
     com.ohos: DEBUG
     org.springframework.amqp: DEBUG
-    org.springframework.ai.chat.client.advisor: debug
-    com.ai.zzl: debug
+
+
 
 
