@@ -3,7 +3,7 @@ import { ElMessage } from 'element-plus'
 import router from '../router'
 
 const aiService = axios.create({
-  baseURL: 'http://localhost:12345',
+  baseURL: 'http://localhost:8089',
   timeout: 30000
 })
 
