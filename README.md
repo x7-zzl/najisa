@@ -59,7 +59,7 @@
 
 ### 🤖 AI 智能助手
 
-- 独立 AI 对话服务（端口 `12345`）
+- 独立 AI 对话服务（端口 `8089`）
 - 基于 Spring AI + DeepSeek 大语言模型
 - 多会话管理，聊天历史记录
 
@@ -123,7 +123,7 @@ najisa/
 │       ├── router/index.js              # 路由配置 + 登录守卫
 │       ├── utils/
 │       │   ├── request.js               # Axios 实例（后端 8088）
-│       │   └── aiRequest.js             # AI 服务 Axios（12345）
+│       │   └── aiRequest.js             # AI 服务 Axios（8089）
 │       ├── components/
 │       │   └── MessageNotification.vue  # 通知铃铛组件
 │       └── views/
@@ -230,9 +230,9 @@ npm run serve
 
 ### 6. 启动 AI 服务（可选）
 
-AI 对话功能依赖独立的 API 服务（端口 `12345`）。你需要：
+AI 对话功能依赖独立的 API 服务（端口 `8089`）。你需要：
 - 配置 DeepSeek API Key
-- 或部署兼容 OpenAI 接口的代理服务在端口 `12345`
+- 或部署兼容 OpenAI 接口的代理服务在端口 `8089`
 
 ---
 

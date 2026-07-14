@@ -6,16 +6,22 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author zhangzl
+ * @date 2026/3/16  10:37
  * @description 文章浏览次数统计
- * @date 2026/03/16 10:37:37
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ArticleViewCdn {
-    // 文章id
+
+    /**
+     * 文章ID
+     */
     private String articleId;
-    // 用户id
+
+    /**
+     * 用户ID
+     */
     private String userId;
 
 }

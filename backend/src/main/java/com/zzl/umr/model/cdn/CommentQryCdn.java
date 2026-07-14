@@ -6,29 +6,41 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author zhangzl
+ * @date 2026/3/16  17:05
  * @description 通用评论查询参数
- * @date 2026/03/16 17:05:48
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentQryCdn {
 
-    // 文章或者视频id
+    /**
+     * 文章或视频ID
+     */
     public String bussinessId;
 
-    // 评论者id
+    /**
+     * 评论者ID
+     */
     public String userId;
 
-    // 评论内容
+    /**
+     * 评论内容
+     */
     public String comment;
 
-    // 评论类型（0文章1视频）
+    /**
+     * 评论类型（0-文章，1-视频）
+     */
     public Integer commentType;
 
-    // 父级评论id
+    /**
+     * 父级评论ID
+     */
     public String parentId;
 
-    // 评论层级（顶层评论0，回复顶层评论1，其他2）
+    /**
+     * 评论层级（0-顶层评论，1-回复顶层评论，2-其他）
+     */
     public Integer commentLevel;
 }

@@ -5,8 +5,8 @@ import lombok.Data;
 
 /**
  * @author zhangzl
+ * @date 2025/10/14  23:52
  * @description 返回结果封装
- * @date 2025/10/14 23:52
  */
 @Data
 public class HttpResult<T> {

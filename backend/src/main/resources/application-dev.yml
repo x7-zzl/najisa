@@ -53,3 +53,8 @@ file:
 auth:
   jwt:
     secret: +QNj7vtIm9j1DCtJk38PleArUk1SsDXTjS6f/zpeSIxnhOjhHVrUcIn03FvLTH4ow3n4b9jq3YAALzymKmnXPQ==
+
+# AI 服务配置
+ai:
+  python:
+    base-url: http://127.0.0.1:8089

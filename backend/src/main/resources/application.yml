@@ -22,18 +22,6 @@ spring:
   application:
     name: najisa
 
-  # openai 配置
-#  ai:
-#    openai:
-#      api-key: sk-a7d75777e83842f3918731be3bd89490
-#      base-url: https://api.deepseek.com
-#      chat:
-#        options:
-#          # 模型名称
-#          model: deepseek-chat
-#          # 模型温度，值越大，输出结果越随机
-#          temperature: 0.7
-
   #设置日期参数
   jackson:
     date-format: yyyy-MM-dd

@@ -18,5 +18,11 @@ public class RedisKeyFixConstant {
     // 每日浏览量前缀
     public static final String DAILY_VIEW_KEY_PREFIX = "article:daily:view:";
 
+    // 聊天上下文缓存前缀（暂未使用，预留给后续 Redis 缓存聊天上下文）
+    public static final String CHAT_CONTEXT_KEY_PREFIX = "chat:context:";
+
+    // 聊天消息历史缓存前缀（最近N条消息）
+    public static final String CHAT_HISTORY_KEY_PREFIX = "chat:history:";
+
 
 }
